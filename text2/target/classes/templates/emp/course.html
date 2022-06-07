@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)http://getbootstrap.com/docs/4.0/examples/dashboard/ -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Dashboard Template for Bootstrap</title>
+    <!-- Bootstrap core CSS -->
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link th:href="@{/css/dashboard.css}" rel="stylesheet">
+    <style type="text/css">
+        /* Chart.js */
+
+        @-webkit-keyframes chartjs-render-animation {
+            from {
+                opacity: 0.99
+            }
+            to {
+                opacity: 1
+            }
+        }
+
+        @keyframes chartjs-render-animation {
+            from {
+                opacity: 0.99
+            }
+            to {
+                opacity: 1
+            }
+        }
+
+        .chartjs-render-monitor {
+            -webkit-animation: chartjs-render-animation 0.001s;
+            animation: chartjs-render-animation 0.001s;
+        }
+    </style>
+</head>
+
+<body>
+<script>
+    function refresh() {
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                procQueryResponse(this.responseText);
+
+
+            }
+        };
+        xhttp.open("GET", "/courses", true);
+        xhttp.setRequestHeader('Accept', 'application/json');
+        xhttp.send();
+
+
+    }
+
+    function procQueryResponse(responseText) {
+        const obj=JSON.parse(responseText);
+
+        if(obj.success){
+
+            const tblBody=document.getElementById('courses');
+            tblBody.innerText='';
+            for(let course of obj.data)
+            {
+                const tr=document.createElement('tr');
+                const td=document.createElement('td');
+                td.innerText=course.id;
+                const td2=document.createElement('td');
+                td2.innerText=course.courseName;
+                const td3=document.createElement('td');
+                td3.innerText=course.teacherName;
+                const td4=document.createElement('td');
+
+
+
+
+                const iptDel=document.createElement('input');
+                iptDel.type='button';
+                iptDel.value='删除';
+                iptDel.addEventListener('click',function () {
+                    onDelete(course);
+                    return false;
+                });
+                const iptUpdate=document.createElement('input');
+                iptUpdate.type='button';
+                iptUpdate.value='修改';
+                iptUpdate.addEventListener('click',function () {
+                    update(course);
+                    return false;
+                });
+
+                td4.appendChild(iptDel);
+                td4.appendChild(iptUpdate);
+                tr.appendChild(td);
+                tr.appendChild(td2);
+                tr.appendChild(td3);
+                tr.appendChild(td4);
+
+                tblBody.appendChild(tr);
+
+            }
+
+
+        }
+
+    }
+    function onDelete(course) {
+        console.log('删除中.....');
+        console.log(course);
+        xhttp.onreadystatechange=function(){
+            if (this.readyState == 4 && this.status == 200) {
+                const obj = JSON.parse(this.responseText);
+                console.log(obj);
+                if (obj.success) {
+                    alert('删除成功');
+                    refresh();
+                }else {
+                    alert('删除失败');
+                }
+            }
+
+        }
+
+
+        xhttp.open("POST", "/course/delete?id="+course.id, true);
+        xhttp.setRequestHeader('Accept', 'application/json');
+        xhttp.send();
+
+    }
+    function add() {
+        const iptCourseName = document.getElementById('iptCourseName');
+        const iptTeacherName=document.getElementById('iptTeacherName');
+
+        xhttp.onreadystatechange=function(){
+            if (this.readyState == 4 && this.status == 200) {
+                const obj = JSON.parse(this.responseText);
+                console.log(obj);
+                if (obj.success) {
+                    alert('添加成功');
+                    refresh();
+                }else {
+                    alert('添加失败');
+                }
+            }
+
+        }
+
+
+        xhttp.open("POST", "/course/add?courseName="+iptCourseName.value+'&teacherName='+iptTeacherName.value, true);
+        xhttp.setRequestHeader('Accept', 'application/json');
+        xhttp.send();
+    }
+
+    function update(course) {
+        console.log('更新中.....');
+        const iptCourseName = document.getElementById('iptCourseName');
+        const iptTeacherName=document.getElementById('iptTeacherName')
+        const iptId = document.getElementById('iptId');
+
+        iptId.value=course.id;
+        iptCourseName.value=course.courseName;
+        iptTeacherName.value=course.teacherName;
+
+
+    }
+
+
+    function onUpdate() {
+        const iptCourseName = document.getElementById('iptCourseName');
+        const iptTeacherName=document.getElementById('iptTeacherName')
+        const iptId = document.getElementById('iptId');
+
+        xhttp.onreadystatechange=function(){
+            if (this.readyState == 4 && this.status == 200) {
+                const obj = JSON.parse(this.responseText);
+                console.log(obj);
+                if (obj.success) {
+                    alert('修改成功');
+                    refresh();
+                }else {
+                    alert('修改失败');
+                }
+            }
+
+        }
+
+
+        xhttp.open("POST", "/course/add?courseName="+iptCourseName.value+'&teacherName='+iptTeacherName.value+'&id='+iptId.value, true);
+        xhttp.setRequestHeader('Accept', 'application/json');
+        xhttp.send();
+
+    }
+    function getById() {
+        const ipId=document.getElementById('iptId');
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                procQueryResponse(this.responseText);
+
+
+            }
+        };
+        xhttp.open("GET", "/course?id="+ipId.value, true);
+        xhttp.setRequestHeader('Accept', 'application/json');
+        xhttp.send();
+    }
+
+    var xhttp = new XMLHttpRequest();
+
+    window.onload = function () {
+        refresh();
+
+    }
+</script>
+
+<!--	顶部导航栏-->
+
+
+
+
+<div th:replace="~{commons/commons::topbar}"></div>
+
+<div class="container-fluid">
+    <div class="row">
+        <!--侧边栏-->
+        <div th:replace="~{commons/commons::sidebar(active='course.html')}"></div>
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+            <!--            <h2><a class="btn btn-sm btn-success"th:href="@{/emp}">添加员工</a></h2>-->
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <div>
+                        <label for="iptId">id</label>
+                        <input id="iptId" type="text" placeholder="输入id号" name="id" >
+                    </div>
+                    <div>
+                        <label for="iptCourseName">课程名</label>
+                        <input id="iptCourseName" type="text" placeholder="输入课程" name="courseName">
+                    </div>
+                    <div>
+                        <label for="iptTeacherName">密码</label>
+                        <input id="iptTeacherName" type="text" placeholder="输入老师名" name="teacherName">
+                    </div>
+                    </form>
+                    <input type="button"value="添加"onclick="add()">
+                    <input type="button"value="刷新" onclick="refresh()">
+                    <input type="button"value="查询" onclick="getById()">
+                    <input type="button" value="确认修改" onclick="onUpdate()">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>课程名</th>
+                                <th>老师名</th>
+                                <th>操作</th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody id="courses">
+
+                        </tbody>
+                    </table>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+
+</body>
+
+</html>
